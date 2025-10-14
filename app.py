@@ -1,6 +1,7 @@
 from flask import Flask
 app = Flask(__name__)
-API_KEY = "sk_test_51Mx82uFJgEXEMPLE..."
+import os
+API_KEY = os.getenv("API_KEY")
 
 @app.route("/")
 def home():
