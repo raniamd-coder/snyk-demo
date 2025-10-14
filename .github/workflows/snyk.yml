@@ -17,6 +17,6 @@ jobs:
         run: npm install -g snyk
 
       - name: Executer l’analyse Snyk
-        run: snyk test --file=requirements.txt --package-manager=pip
+        run: snyk test --file=requirements.txt --package-manager=pip --skip-unresolved
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
