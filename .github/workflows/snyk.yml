@@ -60,5 +60,5 @@ jobs:
           SONAR_HOST_URL: https://sonarcloud.io
         with:
           args: >
-            -Dsonar.projectKey=raniamd-coder_snyk-demo
-            -Dsonar.organization=raniamd-coder
+           -Dsonar.projectKey=raniamd-coder_snyk-demo
+           -Dsonar.organization=raniamd-coder
