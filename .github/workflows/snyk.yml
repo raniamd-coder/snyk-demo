@@ -2,44 +2,63 @@ name: Analyse Snyk + SonarCloud
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   sca:
+    name: Snyk SCA (dépendances)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Installer Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
 
       - name: Installer Snyk CLI
         run: npm install -g snyk
 
-      - name: Exécuter l’analyse Snyk
-        run: snyk test --file=requirements.txt --package-manager=pip --skip-unresolved
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Installer dépendances Python
+        run: pip install -r requirements.txt
+
+      - name: Exécuter l’analyse Snyk (SCA)
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --file=requirements.txt --package-manager=pip
+        
 
   sonar:
+    name: SonarCloud (qualité de code)
     runs-on: ubuntu-latest
-    needs: sca  # n’exécute Sonar qu’après Snyk
+    needs: sca
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # indispensable pour SonarCloud
+          fetch-depth: 0  
 
-      - name: Setup Java pour Sonar
-        uses: actions/setup-java@v3
+      - name: Setup Java (requis par Sonar)
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Analyse SonarCloud
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
         with:
           args: >
-            -Dsonar.projectKey=TON_USER_GITHUB_snyk-demo
-            -Dsonar.organization=TON_ORG_SONARCLOUD
+            -Dsonar.projectKey=raniamd-coder_snyk-demo
+            -Dsonar.organization=raniamd-coder
