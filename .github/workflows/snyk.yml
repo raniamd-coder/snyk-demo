@@ -1,4 +1,4 @@
-name: Analyse Snyk
+name: Analyse Snyk + SonarCloud
 
 on: [push, pull_request]
 
@@ -16,7 +16,30 @@ jobs:
       - name: Installer Snyk CLI
         run: npm install -g snyk
 
-      - name: Executer l’analyse Snyk
+      - name: Exécuter l’analyse Snyk
         run: snyk test --file=requirements.txt --package-manager=pip --skip-unresolved
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  sonar:
+    runs-on: ubuntu-latest
+    needs: sca  # n’exécute Sonar qu’après Snyk
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # indispensable pour SonarCloud
+
+      - name: Setup Java pour Sonar
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Analyse SonarCloud
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=TON_USER_GITHUB_snyk-demo
+            -Dsonar.organization=TON_ORG_SONARCLOUD
